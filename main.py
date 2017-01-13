@@ -17,26 +17,28 @@ class PathTrie(object):
 
     def absurdInTree(self, urlString):
         urlParts = urlString.split("/")
-        node, remains = self.findChildNode(self.root, urlParts[0], urlParts[1:])
+        node, remains = self._findChildNode(self.root, urlParts[0], urlParts[1:])
         if remains is not None:
-            self.addChildNode(node, remains)
+            self._addChildNode(node, remains)
 
-    def findChildNode(self, node, url, remains):
-        if self.hasThisChild(node, url):
-            child = self.getChildNodeByName(node, url)
-            return self.findChildNode(child, remains[0], remains[1:])
+    def _findChildNode(self, node, url, remains):
+        if self._hasThisChild(node, url):
+            child = self._getChildNodeByName(node, url)
+            if not remains:
+                return child, None
+            return self._findChildNode(child, remains[0], remains[1:])
         else:
             remains.insert(0, url)
             return node, remains
 
-    def hasThisChild(self, node, name):
+    def _hasThisChild(self, node, name):
         return node.childNameList.count(name) != 0
 
-    def getChildNodeByName(self, parent, name):
+    def _getChildNodeByName(self, parent, name):
         index = parent.childNameList.index(name)
         return parent.childNode[index]
 
-    def addChildNode(self, parent, url):
+    def _addChildNode(self, parent, url):
         for name in url:
             child = PathNode(name)
             parent.childNode.append(child)
@@ -51,9 +53,17 @@ class PathTrie(object):
             for node in node.childNode:
                 self.traversalTrieTree(node)
 
+    def matchUrl(self, urlString):
+        urlParts = urlString.split("/")
+        node, remains = self._findChildNode(self.root, urlParts[0], urlParts[1:])
+        if remains is None:
+            print node.n
+        else:
+            print "url match failed!!!"
+
 if __name__ == "__main__":
     urlTrieTree = PathTrie()
     urlTrieTree.absurdInTree("www.some.com/other/url")
     urlTrieTree.absurdInTree("www.some.com/2other/edf")
     urlTrieTree.absurdInTree("www.some.com/other/url2")
-    urlTrieTree.traversalTrieTree()
+    urlTrieTree.matchUrl("www.some.com/other/url")
